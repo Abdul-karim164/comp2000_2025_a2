@@ -21,6 +21,13 @@ public abstract class Actor implements Pulse {
     turns = 1;
     setPoly();
   }
+  public Cell getCell() {
+    return loc;
+  }
+
+  public void moveTo(Cell newLoc) {
+    setLocation(newLoc);
+  }
 
   public void paint(Graphics g) {
     for(Polygon p: display) {
@@ -55,3 +62,4 @@ public abstract class Actor implements Pulse {
     color = Color.getHSBColor(hsbValues[0], hsbValues[1], hsbValues[2]);
   }
 }
+

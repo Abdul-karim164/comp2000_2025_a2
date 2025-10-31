@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 
 public class Grid {
@@ -57,6 +58,27 @@ public class Grid {
     return Optional.empty();
   }
 
+  public Cell neighbor(Cell c, int dc, int dr) {
+    int colIdx = labelToCol(c.col) + dc;
+    int rowIdx = c.row + dr;
+    return cellAtColRow(colIdx, rowIdx).orElse(null);
+  }
+  
+  public Cell randomEmptyCell(Set<Cell> blocked) {
+    Random rnd = new Random();
+    int maxCols = cells.length;
+    int maxRows = cells[0].length;
+    while (true) {
+      int c = rnd.nextInt(maxCols);
+      int r = rnd.nextInt(maxRows);
+      Cell pick = cells[c][r];
+      if (blocked == null || !blocked.contains(pick)) {
+        return pick;
+      }
+    }
+  }
+
+  
   public List<Cell> getRadius(Cell from, int size) {
     int i = labelToCol(from.col);
     int j = from.row;

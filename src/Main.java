@@ -3,73 +3,50 @@ import java.awt.Graphics;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-
-import java.time.Duration;
-import java.time.Instant;
+import javax.swing.SwingUtilities;
 
 
 public class Main extends JFrame {
-    public static void main(String[] args) throws Exception {
-      Main window = new Main();
-      window.run();
-    }
+  private Canvas canvas;
 
-    class Canvas extends JPanel implements MouseListener {
-      Stage stage;
-      public Canvas() {
-        setPreferredSize(new Dimension(1024, 720));
-        this.addMouseListener(this);
-        stage = StageReader.readStage("data/stage1.rvb");
+  public static void main(String[] args) {
+      SwingUtilities.invokeLater(() -> new Main().start());
+  }
+
+  private void start() {
+      setTitle("COMP2000 – Weather Rabbit");
+      setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+      canvas = new Canvas();
+      setContentPane(canvas);
+      pack();
+      setLocationRelativeTo(null);
+      setVisible(true);
+
+      // keys to stage
+      canvas.setFocusable(true);
+      canvas.requestFocusInWindow();
+      canvas.addKeyListener(new java.awt.event.KeyAdapter() {
+          @Override public void keyPressed(java.awt.event.KeyEvent e) {
+              canvas.getStage().handleKey(e.getKeyCode());
+              canvas.repaint();
+          }
+      });
+
+      // repaint timer
+      new javax.swing.Timer(500, ev -> canvas.repaint()).start();
+  }
+
+  private static final class Canvas extends JPanel {
+      private final Stage stage = new Stage();
+      Canvas() {
+          setPreferredSize(new Dimension(1024, 720));
+          setDoubleBuffered(true);
       }
-
-      @Override
-      public void paint(Graphics g) {
-        stage.paint(g, getMousePosition());
+      Stage getStage() { return stage; }
+      @Override protected void paintComponent(Graphics g) {
+          super.paintComponent(g);
+          stage.paint(g, getMousePosition());
       }
-
-      @Override
-      public void mouseClicked(MouseEvent e) {
-        stage.mouseClicked(e.getX(), e.getY());
-      }
-
-      @Override
-      public void mousePressed(MouseEvent e) {}
-
-      @Override
-      public void mouseReleased(MouseEvent e) {}
-
-      @Override
-      public void mouseEntered(MouseEvent e) {}
-
-      @Override
-      public void mouseExited(MouseEvent e) {}
-    }
-
-    private Main() {
-      this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      Canvas canvas = new Canvas();
-      this.setContentPane(canvas);
-      this.pack();
-      this.setVisible(true);
-    }
-
-    public void run() {
-      while(true) {
-        // Re-draw the screen 50 times per second
-        Instant startTime = Instant.now();
-        repaint();
-        Instant endTime = Instant.now();
-        long howLong = Duration.between(startTime, endTime).toMillis();
-        try {
-          Thread.sleep(20l - howLong);
-        } catch(InterruptedException e) {
-          System.out.println("thread was interrupted, nothing to worry about!");
-        } catch(IllegalArgumentException e) {
-          System.out.println("application can't keep up with framerate");
-        }
-      }
-    }
+  }
 }
